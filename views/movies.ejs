@@ -1,0 +1,65 @@
+<%- include('./partials/header'); -%>
+    <h1>Movies</h1>
+    <h2>Vos Prochaine films et series arrivent bientot !</h2>
+    <div > 
+        <h2><%= title %></h2>
+       <div class="film-date">
+        <% movies.forEach(movie => { %>
+        <p style="color: brown;"><a href="/movie-details/<%= movie._id %>"><%= movie.movietitle %> date de sortie : (<%= movie.movieyear %>)</a></p>  
+       <% }); %>
+    </div>
+      <br>
+      <br>
+      
+
+       <form action="/movies" method="post" enctype="multipart/form-data">
+        <label for="title"> Title</label>
+        <input class="bg-white focus:outline-none focus:shadow-outline border border-gray-300 rounded-lg py-2 px-4 block w-3/6 appearance-none leading-normal" type="title" placeholder="title" name="movietitle" id="title">
+        <br>
+        <label for="heros"> Date</label>
+        <input class="bg-white focus:outline-none focus:shadow-outline border border-gray-300 rounded-lg py-2 px-4 block w-3/6 appearance-none leading-normal" type="year" placeholder="year" name="movieyear" id="year">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+            Button
+          </button>
+       </form>
+
+       
+    </div>
+   <br>
+
+
+                                                        <!-- Ajax-->
+   <script>
+    const form = document.querySelector('form');
+    form.addEventListener('submit',addFilm)
+  
+    function addFilm(event) {
+        event.preventDefault();
+     if (window.fetch) {
+           fetch('/movies', {
+               method: 'post',
+               body: new FormData(form)
+           })
+           .then(checkStatus)
+           .catch((error) => {  
+               console.error('request failed' , error);
+               
+           })
+     } 
+    }
+    
+     
+      function checkStatus(response) {
+          if (response.status >= 200 &&  response.status < 300) {
+              let newFilmP = document.createElement('p');
+              const filmTitle = document.getElementById('title').value;
+              const filmYear = document.getElementById('year').value;
+              newFilmP.innerHTML = `${filmTitle} date de sortie: (${filmYear})`
+              document.querySelector('.film-date').appendChild(newFilmP)
+              form.reset()  
+          }
+      }
+  
+   
+  </script>
+    <%- include('./partials/footer'); -%>

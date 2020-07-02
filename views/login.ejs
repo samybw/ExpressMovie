@@ -1,0 +1,157 @@
+<%- include('./partials/header'); -%>
+
+
+<h1><%= title %></h1>
+  
+ 
+<div class="w-full max-w-xs" id="login">
+    <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" method="POST" action="/login">
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+          email
+        </label>
+        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="email">
+      </div>
+      <div class="mb-6">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+          Password
+        </label>
+        <input class="shadow appearance-none border  rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************">
+       
+      </div>
+      <div class="flex items-center justify-between">
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+          Sign In
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div id="profile" style="display: none;">
+  <button id="disconnectBtn">Deconnexion</button>
+  <button id="diplay-payload">voir le payLoad</button>
+  <div id="decoded-payload"></div>
+  <div>
+    <a href="#" id="member-only" >Espace Membre</a>
+  </div>
+  </div>
+
+  <script>
+    var form = document.querySelector('form');
+    form.addEventListener("submit", loginUser);	
+    function loginUser(event) {				
+        loginUserWithXHR(event);
+    }	
+     
+     var loginArea = document.getElementById('login')
+     var profileArea = document.getElementById('profile')
+
+     var displayPayloadBtn = document.querySelector('#diplay-payload')
+     displayPayloadBtn.addEventListener('click',displayPayload)
+
+
+     var disconnectBtn = document.querySelector('#disconnectBtn')
+     disconnectBtn.addEventListener('click', disconnect)
+     var connectionLinkArea = document.querySelector('#connectionlink')
+     handleFormDisplay()
+
+     var memberOnlyLink = document.getElementById('member-only')
+     memberOnlyLink.addEventListener('click', makeReqWithToken)
+    
+    function loginUserWithXHR(event) {		
+        event.preventDefault();
+        console.log('loginUserWithXHR');		
+        // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/send
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/login', true);
+        //Send the proper header information along with the request
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {//Call a function when the state changes.
+            if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+              var token = xhr.response
+              switchToLoggedInMode()
+              localStorage.setItem('token',token)
+                form.reset();
+            }
+        }				
+        var email = document.getElementById('email').value;
+        var password = document.getElementById('password').value;
+        var payLoad = "email=" + email + "&" + "password=" + password; 
+        xhr.send(payLoad); 				
+    }
+
+         function handleFormDisplay() {
+           if (localStorage.getItem('token')) {
+             switchToLoggedInMode()
+           } else {
+             switchToLoggedOutMode()
+           }
+         }
+         function switchToLoggedInMode() {
+           loginArea.style.display = 'none'
+           profileArea.style.display = 'block'
+          // connectionLinkArea = '<a href="/login">deconnexion</>'
+     }
+
+         function switchToLoggedOutMode() {
+           loginArea.style.display = 'block'
+           profileArea.style.display = 'none'
+         //  connectionLinkArea = '<a href="/login">connexion</>'
+    }
+         
+         function displayPayload() {  
+           var payLoad = parseJwt();
+           
+           
+           var decodedPayloadDiv = document.querySelector('#decoded-payload')
+           decodedPayloadDiv.innerHTML = '<pre>' + JSON.stringify(payLoad) + '</pre>'
+         }
+
+         function parseJwt() {
+           var tokenFromStorage = localStorage.getItem('token')
+           if (tokenFromStorage) {
+             var base64PayLoad = tokenFromStorage.split('.')[1];
+             return JSON.parse(window.atob(base64PayLoad))
+           } else {
+             return 'not token to parse'
+           }
+         }
+         function disconnect() {
+           switchToLoggedOutMode()
+           localStorage.removeItem('token')
+         }
+
+         function makeReqWithToken(evt) {
+           evt.preventDefault()
+           var page = this.id 
+           var tokenFromStorage = localStorage.getItem('token')
+           var config = {}
+
+           if (tokenFromStorage) {
+             config.headers = {'Authorization':'Bearer ' + JSON.parse(tokenFromStorage) }
+           }
+
+           axios.get('http://localhost:3000/' + page , config
+           ).then(res => {
+            console.log('succes')
+             console.log(res)
+            }).catch(err => {
+              console.error('makeReqWithToken',err);
+              
+            })
+         }
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+<%- include('./partials/footer'); -%>
