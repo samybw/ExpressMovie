@@ -1,5 +1,5 @@
 Salut à tous ! 
-Voici ma nouvelle app qui se nomme ExpressMovies elle m'a permis d'apprendre plusieurs choses :
+Voici ma nouvelle app qui se nomme ExpressMovies elle m'a permis d'apprendre plusieurs choses:
 -Crée des templates avec EJS
 -Passer des données à une vue 
 -Le découpage des templates et les partials
